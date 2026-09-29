@@ -81,6 +81,17 @@ jobs:
         run: |
           rm -rf overlay_src templates unaligned.apk aligned.apk compiled_res.zip debug.keystore
 
+      - name: Auto-update module.prop version
+        run: |
+          BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/* | tail -n 1)
+          VANADIUM_VER_NAME=$($BUILD_TOOLS/aapt dump badging apks/TrichromeWebView.apk | awk -F"versionName='" '{print $2}' | cut -d"'" -f1)
+          VANADIUM_VER_CODE=$($BUILD_TOOLS/aapt dump badging apks/TrichromeWebView.apk | awk -F"versionCode='" '{print $2}' | cut -d"'" -f1)
+
+          echo "Detected Vanadium: $VANADIUM_VER_NAME (code: $VANADIUM_VER_CODE)"
+
+          sed -i "s/^version=.*/version=$VANADIUM_VER_NAME/" module.prop
+          sed -i "s/^versionCode=.*/versionCode=$VANADIUM_VER_CODE/" module.prop
+
       - name: Create Flashable Zip
         run: |
           zip -r9 Vanadium-WebView-Module.zip \
