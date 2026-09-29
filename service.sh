@@ -6,11 +6,11 @@ while [ "$(getprop sys.boot_completed)" != "1" ]; do
     sleep 2
 done
 
-# Check module version from module.prop
-CURRENT_VER=$(grep "^version=" "$MODDIR/module.prop" | cut -d= -f2)
+# Current version stamp from module.prop
+CURRENT_VER=$(grep "^versionCode=" "$MODDIR/module.prop" | cut -d= -f2)
 
-# If not registered or module version changed, update packages
-if [ ! -f "$MODDIR/.installed" ] || [ "$(cat "$MODDIR/.installed")" != "$CURRENT_VER" ]; then
+# If not registered or module version changed, register/update with arm64 ABI override
+if [ ! -f "$MODDIR/.installed" ] || [ "$(cat "$MODDIR/.installed")" != "$CURRENT_VER" ] || ! pm list packages | grep -q "app.vanadium.webview"; then
     if [ -f /system/product/app/VTL/VTL.apk ]; then
         VTL_PATH="/system/product/app/VTL/VTL.apk"
         VWV_PATH="/system/product/app/VWV/VWV.apk"
@@ -24,8 +24,7 @@ if [ ! -f "$MODDIR/.installed" ] || [ "$(cat "$MODDIR/.installed")" != "$CURRENT
 
     pm install -r --abi arm64-v8a "$VTL_PATH" 2>/dev/null || true
     pm install -r --abi arm64-v8a "$VWV_PATH" 2>/dev/null || true
-    
-    # Save current version stamp
+
     echo "$CURRENT_VER" > "$MODDIR/.installed"
 fi
 

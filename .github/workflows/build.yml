@@ -4,12 +4,14 @@ on:
   push:
     branches: [ "main", "master" ]
   schedule:
-    - cron: '0 0 * * 0'
+    - cron: '0 0 * * 0'   # Automatically checks/builds every Sunday at 00:00 UTC
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout Repository
@@ -52,9 +54,6 @@ jobs:
           BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/* | tail -n 1)
           ANDROID_JAR=$(ls -d $ANDROID_HOME/platforms/android-34/android.jar || ls -d $ANDROID_HOME/platforms/android-*/android.jar | tail -n 1)
 
-          echo "Using Build Tools: $BUILD_TOOLS"
-          echo "Using Android Framework: $ANDROID_JAR"
-
           # 1. Compile resources
           $BUILD_TOOLS/aapt2 compile --dir overlay_src/res -o compiled_res.zip
 
@@ -81,7 +80,7 @@ jobs:
         run: |
           rm -rf overlay_src templates unaligned.apk aligned.apk compiled_res.zip debug.keystore
 
-      - name: Auto-update module.prop version
+      - name: Auto-generate Version Metadata and update.json
         run: |
           BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/* | tail -n 1)
           VANADIUM_VER_NAME=$($BUILD_TOOLS/aapt dump badging apks/TrichromeWebView.apk | awk -F"versionName='" '{print $2}' | cut -d"'" -f1)
@@ -89,8 +88,22 @@ jobs:
 
           echo "Detected Vanadium: $VANADIUM_VER_NAME (code: $VANADIUM_VER_CODE)"
 
+          # Update module.prop for the flashable zip
           sed -i "s/^version=.*/version=$VANADIUM_VER_NAME/" module.prop
           sed -i "s/^versionCode=.*/versionCode=$VANADIUM_VER_CODE/" module.prop
+
+          # Generate updated update.json
+          cat <<EOF > update.json
+          {
+            "version": "$VANADIUM_VER_NAME",
+            "versionCode": $VANADIUM_VER_CODE,
+            "zipUrl": "https://github.com/${{ github.repository }}/releases/latest/download/Vanadium-WebView-Module.zip",
+            "changelog": "https://github.com/${{ github.repository }}/releases"
+          }
+          EOF
+
+          echo "VANADIUM_VER_NAME=$VANADIUM_VER_NAME" >> $GITHUB_ENV
+          echo "VANADIUM_VER_CODE=$VANADIUM_VER_CODE" >> $GITHUB_ENV
 
       - name: Create Flashable Zip
         run: |
@@ -107,3 +120,20 @@ jobs:
         with:
           name: Vanadium-WebView-Module
           path: Vanadium-WebView-Module.zip
+
+      - name: Publish to GitHub Releases
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="v${VANADIUM_VER_NAME}"
+          gh release create "$TAG_NAME" Vanadium-WebView-Module.zip \
+            --title "Vanadium WebView $VANADIUM_VER_NAME" \
+            --notes "Automated Vanadium WebView build (versionCode $VANADIUM_VER_CODE)" \
+            || gh release upload "$TAG_NAME" Vanadium-WebView-Module.zip --clobber
+
+      - name: Commit and Push update.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add update.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore(release): update update.json to $VANADIUM_VER_NAME [skip ci]" && git push origin main)
