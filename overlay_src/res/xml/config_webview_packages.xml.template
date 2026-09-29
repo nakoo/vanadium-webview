@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<webviewproviders>
+    <webviewprovider
+        packageName="com.android.webview"
+        description="Android WebView"
+        availableByDefault="true" />
+
+    <webviewprovider
+        packageName="com.google.android.webview"
+        description="Android System WebView"
+        availableByDefault="true" />
+
+    <webviewprovider
+        packageName="app.vanadium.webview"
+        description="Vanadium WebView"
+        availableByDefault="true">
+        <signature>@VANADIUM_SIGNATURE@</signature>
+    </webviewprovider>
+</webviewproviders>

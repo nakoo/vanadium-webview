@@ -1,0 +1,95 @@
+name: Build Vanadium WebView Module
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Download Vanadium & Extract Signature
+        run: |
+          echo "=== Downloading official Vanadium WebView APK ==="
+          curl -L -o /tmp/TrichromeWebView.apk \
+            "https://gitlab.com/grapheneos/platform_external_vanadium/-/raw/17/prebuilt/arm64/TrichromeWebView.apk"
+
+          echo "=== Extracting X.509 signature ==="
+          VANADIUM_SIG=$(keytool -printcert -jarfile /tmp/TrichromeWebView.apk -rfc \
+            | awk '/BEGIN CERTIFICATE/{flag=1; next} /END CERTIFICATE/{exit} flag' \
+            | tr -d '\r\n')
+
+          if [ -z "$VANADIUM_SIG" ]; then
+            echo "Error: Failed to extract signature"
+            exit 1
+          fi
+
+          echo "Extracted Signature (first 30 chars): ${VANADIUM_SIG:0:30}..."
+          
+          mkdir -p overlay_src/res/xml
+          sed "s|@VANADIUM_SIGNATURE@|$VANADIUM_SIG|g" \
+            overlay_src/res/xml/config_webview_packages.xml.template \
+            > overlay_src/res/xml/config_webview_packages.xml
+
+          rm -f /tmp/TrichromeWebView.apk
+
+      - name: Compile and Sign Overlay APK
+        run: |
+          BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/* | tail -n 1)
+          ANDROID_JAR=$(ls -d $ANDROID_HOME/platforms/android-34/android.jar || ls -d $ANDROID_HOME/platforms/android-*/android.jar | tail -n 1)
+
+          echo "Using Build Tools: $BUILD_TOOLS"
+          echo "Using Android Framework: $ANDROID_JAR"
+
+          # 1. Compile resources
+          $BUILD_TOOLS/aapt2 compile --dir overlay_src/res -o compiled_res.zip
+
+          # 2. Link APK
+          $BUILD_TOOLS/aapt2 link -I "$ANDROID_JAR" \
+            --manifest overlay_src/AndroidManifest.xml \
+            compiled_res.zip \
+            -o unaligned.apk
+
+          # 3. Align APK
+          $BUILD_TOOLS/zipalign -p -f 4 unaligned.apk aligned.apk
+
+          # 4. Generate keystore & Sign
+          keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey \
+            -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=AndroidDebug"
+
+          mkdir -p overlay
+          $BUILD_TOOLS/apksigner sign --ks debug.keystore --ks-pass pass:android \
+            --ks-key-alias androiddebugkey \
+            --out overlay/CustomWebViewOverlay.apk \
+            aligned.apk
+
+      - name: Clean Build Workspace
+        run: |
+          # Remove source files so only module runtime files are packaged
+          rm -rf overlay_src unaligned.apk aligned.apk compiled_res.zip debug.keystore
+
+      - name: Upload Flashable Module Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          # GitHub Actions automatically zips this into "Vanadium-WebView-Module.zip"
+          name: Vanadium-WebView-Module
+          path: |
+            module.prop
+            customize.sh
+            service.sh
+            action.sh
+            uninstall.sh
+            overlay/
+            common/
+            system/
