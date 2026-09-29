@@ -2,9 +2,9 @@ name: Build Vanadium WebView Module
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "main" ]
   schedule:
-    - cron: '0 0 * * 0'   # Automatically checks/builds every Sunday at 00:00 UTC
+    - cron: '26 4 * * *'
   workflow_dispatch:
 
 jobs:
@@ -126,10 +126,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG_NAME="v${VANADIUM_VER_NAME}"
-          gh release create "$TAG_NAME" Vanadium-WebView-Module.zip \
-            --title "Vanadium WebView $VANADIUM_VER_NAME" \
-            --notes "Automated Vanadium WebView build (versionCode $VANADIUM_VER_CODE)" \
-            || gh release upload "$TAG_NAME" Vanadium-WebView-Module.zip --clobber
+          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            echo "Release $TAG_NAME already exists! Skipping release creation."
+          else
+            gh release create "$TAG_NAME" Vanadium-WebView-Module.zip \
+              --title "Vanadium WebView $VANADIUM_VER_NAME" \
+              --notes "Automated Vanadium WebView build (versionCode $VANADIUM_VER_CODE)"
+          fi
 
       - name: Commit and Push update.json
         run: |
