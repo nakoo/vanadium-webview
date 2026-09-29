@@ -87,7 +87,6 @@ jobs:
             module.prop
             customize.sh
             service.sh
-            action.sh
             uninstall.sh
             overlay/
             system/
