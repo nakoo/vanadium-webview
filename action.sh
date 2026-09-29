@@ -26,7 +26,7 @@ for pkg in VTL VWV; do
         ui_print "- Staging and installing $pkg..."
         cp "$SRC" "$TMP"
         chmod 644 "$TMP"
-        pm install -r --install-location 1 "$TMP"
+        pm install -r --install-location 1 --abi arm64-v8a "$TMP"
         rm -f "$TMP"
     else
         ui_print "Warning: $SRC missing, skipping..."
