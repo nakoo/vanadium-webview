@@ -3,6 +3,8 @@ name: Build Vanadium WebView Module
 on:
   push:
     branches: [ "main", "master" ]
+  schedule:
+    - cron: '0 0 * * 0'
   workflow_dispatch:
 
 jobs:
@@ -79,14 +81,18 @@ jobs:
         run: |
           rm -rf overlay_src templates unaligned.apk aligned.apk compiled_res.zip debug.keystore
 
+      - name: Create Flashable Zip
+        run: |
+          zip -r9 Vanadium-WebView-Module.zip \
+            module.prop \
+            customize.sh \
+            service.sh \
+            uninstall.sh \
+            overlay/ \
+            apks/
+
       - name: Upload Flashable Module Artifact
         uses: actions/upload-artifact@v7
         with:
           name: Vanadium-WebView-Module
-          path: |
-            module.prop
-            customize.sh
-            service.sh
-            uninstall.sh
-            overlay/
-            apks/
+          path: Vanadium-WebView-Module.zip

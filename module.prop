@@ -1,6 +1,7 @@
 id=vanadium-webview-changer
 name=Vanadium WebView Changer
 version=v1.0.0
-versionCode=100
+versionCode=1000
 author=Custom
 description=Automatically installs and sets Vanadium as your system WebView implementation on Android 14+.
+updateJson=https://raw.githubusercontent.com/nakoo/vanadium-system-webview/main/update.json
