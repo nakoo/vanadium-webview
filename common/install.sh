@@ -13,18 +13,13 @@ fi
 
 mkdir -p "$MODPATH/$TLP" "$MODPATH/$WVP"
 
-# Android 14 includes /system/bin/curl by default
-CURL_BIN="curl -s -L --connect-timeout 15 --retry 3 --dns-servers 1.1.1.1,1.0.0.1"
+ui_print "- Installing TrichromeLibrary..."
+cp "$MODPATH/apks/TrichromeLibrary.apk" "$MODPATH/$TLP/VTL.apk"
+[[ -s "$MODPATH/$TLP/VTL.apk" ]] || abort "Failed to copy TrichromeLibrary!"
 
-ui_print "- Downloading TrichromeLibrary..."
-$CURL_BIN -o "$MODPATH/$TLP/VTL.apk" \
-    "https://gitlab.com/grapheneos/platform_external_vanadium/-/raw/17/prebuilt/arm64/TrichromeLibrary.apk?ref_type=heads"
-[[ -s "$MODPATH/$TLP/VTL.apk" ]] || abort "Failed to download TrichromeLibrary!"
-
-ui_print "- Downloading Vanadium WebView..."
-$CURL_BIN -o "$MODPATH/$WVP/VWV.apk" \
-    "https://gitlab.com/grapheneos/platform_external_vanadium/-/raw/17/prebuilt/arm64/TrichromeWebView.apk?ref_type=heads"
-[[ -s "$MODPATH/$WVP/VWV.apk" ]] || abort "Failed to download Vanadium WebView!"
+ui_print "- Installing Vanadium WebView..."
+cp "$MODPATH/apks/TrichromeWebView.apk" "$MODPATH/$WVP/VWV.apk"
+[[ -s "$MODPATH/$WVP/VWV.apk" ]] || abort "Failed to copy Vanadium WebView!"
 
 # Find active overlay partition
 if [[ $LOS -gt 0 ]]; then
@@ -47,4 +42,5 @@ cp "$MODPATH/overlay/CustomWebViewOverlay.apk" "$MODPATH/$OVERLAY_PATH/CustomWeb
 
 # Cleanup temporary files inside module directory
 rm -rf "$MODPATH/overlay"
+rm -rf "$MODPATH/apks"
 rm -rf "$MODPATH/system/.placeholder"

@@ -7,15 +7,25 @@ ui_print "************************************"
 ui_print " Updating Vanadium WebView packages "
 ui_print "************************************"
 
-CURL_BIN="curl -s -L --connect-timeout 15 --retry 3 --dns-servers 1.1.1.1,1.0.0.1"
+# Locate bundled APKs in module directory
+if [ -f "$MODDIR/system/product/app/VTL/VTL.apk" ]; then
+    VTL_SRC="$MODDIR/system/product/app/VTL/VTL.apk"
+    VWV_SRC="$MODDIR/system/product/app/VWV/VWV.apk"
+elif [ -f "$MODDIR/system/app/VTL/VTL.apk" ]; then
+    VTL_SRC="$MODDIR/system/app/VTL/VTL.apk"
+    VWV_SRC="$MODDIR/system/app/VWV/VWV.apk"
+else
+    ui_print "Error: Bundled APKs not found in module directory!"
+    exit 1
+fi
 
-ui_print "- Downloading latest TrichromeLibrary..."
-$CURL_BIN -o /data/local/tmp/VTL.apk \
-    "https://gitlab.com/grapheneos/platform_external_vanadium/-/raw/17/prebuilt/arm64/TrichromeLibrary.apk?ref_type=heads"
+ui_print "- Staging bundled TrichromeLibrary..."
+cp "$VTL_SRC" /data/local/tmp/VTL.apk
+chmod 644 /data/local/tmp/VTL.apk
 
-ui_print "- Downloading latest Vanadium WebView..."
-$CURL_BIN -o /data/local/tmp/VWV.apk \
-    "https://gitlab.com/grapheneos/platform_external_vanadium/-/raw/17/prebuilt/arm64/TrichromeWebView.apk?ref_type=heads"
+ui_print "- Staging bundled Vanadium WebView..."
+cp "$VWV_SRC" /data/local/tmp/VWV.apk
+chmod 644 /data/local/tmp/VWV.apk
 
 ui_print "- Installing updates..."
 pm install -r --install-location 1 /data/local/tmp/VTL.apk
