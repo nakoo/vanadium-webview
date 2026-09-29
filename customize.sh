@@ -50,4 +50,4 @@ mkdir -p "$MODPATH/$OVERLAY_PATH"
 mv "$MODPATH/overlay/CustomWebViewOverlay.apk" "$MODPATH/$OVERLAY_PATH/CustomWebViewOverlay.apk"
 
 # Cleanup temporary build files
-rm -rf "$MODPATH/overlay" "$MODPATH/apks" "$MODPATH/system/.placeholder"
+rm -rf "$MODPATH/overlay" "$MODPATH/apks"

@@ -89,5 +89,4 @@ jobs:
             service.sh
             uninstall.sh
             overlay/
-            system/
             apks/
