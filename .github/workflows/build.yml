@@ -37,9 +37,10 @@ jobs:
 
           echo "Extracted Signature (first 30 chars): ${VANADIUM_SIG:0:30}..."
           
+          # Create res/xml directory and write the generated XML file
           mkdir -p overlay_src/res/xml
           sed "s|@VANADIUM_SIGNATURE@|$VANADIUM_SIG|g" \
-            overlay_src/res/xml/config_webview_packages.xml.template \
+            templates/config_webview_packages.xml.template \
             > overlay_src/res/xml/config_webview_packages.xml
 
           rm -f /tmp/TrichromeWebView.apk
@@ -76,8 +77,7 @@ jobs:
 
       - name: Clean Build Workspace
         run: |
-          # Remove source files so only module runtime files are packaged
-          rm -rf overlay_src unaligned.apk aligned.apk compiled_res.zip debug.keystore
+          rm -rf overlay_src templates unaligned.apk aligned.apk compiled_res.zip debug.keystore
 
       - name: Upload Flashable Module Artifact
         uses: actions/upload-artifact@v4
