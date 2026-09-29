@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -80,7 +80,7 @@ jobs:
           rm -rf overlay_src templates unaligned.apk aligned.apk compiled_res.zip debug.keystore
 
       - name: Upload Flashable Module Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           # GitHub Actions automatically zips this into "Vanadium-WebView-Module.zip"
           name: Vanadium-WebView-Module
