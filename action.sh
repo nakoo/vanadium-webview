@@ -33,4 +33,7 @@ for pkg in VTL VWV; do
     fi
 done
 
+ui_print "- Activating Vanadium WebView..."
+cmd webviewupdate set-webview-implementation app.vanadium.webview 2>/dev/null || true
+
 ui_print "Update complete!"
