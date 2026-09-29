@@ -90,6 +90,5 @@ jobs:
             action.sh
             uninstall.sh
             overlay/
-            common/
             system/
             apks/

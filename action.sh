@@ -7,29 +7,30 @@ ui_print "************************************"
 ui_print " Updating Vanadium WebView packages "
 ui_print "************************************"
 
-# Locate bundled APKs in module directory
-if [ -f "$MODDIR/system/product/app/VTL/VTL.apk" ]; then
-    VTL_SRC="$MODDIR/system/product/app/VTL/VTL.apk"
-    VWV_SRC="$MODDIR/system/product/app/VWV/VWV.apk"
-elif [ -f "$MODDIR/system/app/VTL/VTL.apk" ]; then
-    VTL_SRC="$MODDIR/system/app/VTL/VTL.apk"
-    VWV_SRC="$MODDIR/system/app/VWV/VWV.apk"
+# Locate bundled APK base directory
+if [ -d "$MODDIR/system/product/app/VTL" ]; then
+    APP_BASE="$MODDIR/system/product/app"
+elif [ -d "$MODDIR/system/app/VTL" ]; then
+    APP_BASE="$MODDIR/system/app"
 else
     ui_print "Error: Bundled APKs not found in module directory!"
     exit 1
 fi
 
-ui_print "- Staging bundled TrichromeLibrary..."
-cp "$VTL_SRC" /data/local/tmp/VTL.apk
-chmod 644 /data/local/tmp/VTL.apk
+# TrichromeLibrary (VTL) must be installed before WebView (VWV)
+for pkg in VTL VWV; do
+    SRC="$APP_BASE/$pkg/$pkg.apk"
+    TMP="/data/local/tmp/$pkg.apk"
 
-ui_print "- Staging bundled Vanadium WebView..."
-cp "$VWV_SRC" /data/local/tmp/VWV.apk
-chmod 644 /data/local/tmp/VWV.apk
+    if [ -f "$SRC" ]; then
+        ui_print "- Staging and installing $pkg..."
+        cp "$SRC" "$TMP"
+        chmod 644 "$TMP"
+        pm install -r --install-location 1 "$TMP"
+        rm -f "$TMP"
+    else
+        ui_print "Warning: $SRC missing, skipping..."
+    fi
+done
 
-ui_print "- Installing updates..."
-pm install -r --install-location 1 /data/local/tmp/VTL.apk
-pm install -r --install-location 1 /data/local/tmp/VWV.apk
-
-rm -f /data/local/tmp/VTL.apk /data/local/tmp/VWV.apk
 ui_print "Update complete!"
