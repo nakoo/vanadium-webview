@@ -1,5 +1,5 @@
-id=vanadium-webview-changer
-name=Vanadium WebView Changer
+id=vanadium_webview
+name=Vanadium WebView
 version=v1.0.0
 versionCode=1000
 author=nakoo
