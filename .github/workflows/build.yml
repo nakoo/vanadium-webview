@@ -97,7 +97,7 @@ jobs:
           {
             "version": "$VANADIUM_VER_NAME",
             "versionCode": $VANADIUM_VER_CODE,
-            "zipUrl": "https://github.com/${{ github.repository }}/releases/latest/download/Vanadium-WebView-Module.zip",
+            "zipUrl": "https://github.com/${{ github.repository }}/releases/latest/download/vanadium-webview-module.zip",
             "changelog": "https://github.com/${{ github.repository }}/releases"
           }
           EOF
@@ -107,7 +107,7 @@ jobs:
 
       - name: Create Flashable Zip
         run: |
-          zip -r9 Vanadium-WebView-Module.zip \
+          zip -r9 vanadium-webview-module.zip \
             module.prop \
             customize.sh \
             service.sh \
@@ -118,8 +118,8 @@ jobs:
       - name: Upload Flashable Module Artifact
         uses: actions/upload-artifact@v7
         with:
-          name: Vanadium-WebView-Module
-          path: Vanadium-WebView-Module.zip
+          name: vanadium-webview-module
+          path: vanadium-webView-module.zip
 
       - name: Publish to GitHub Releases
         env:
@@ -129,7 +129,7 @@ jobs:
           if gh release view "$TAG_NAME" >/dev/null 2>&1; then
             echo "Release $TAG_NAME already exists! Skipping release creation."
           else
-            gh release create "$TAG_NAME" Vanadium-WebView-Module.zip \
+            gh release create "$TAG_NAME" vanadium-webview-module.zip \
               --title "Vanadium WebView $VANADIUM_VER_NAME" \
               --notes "Automated Vanadium WebView build (versionCode $VANADIUM_VER_CODE)"
           fi
