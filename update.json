@@ -1,6 +1,6 @@
 {
-  "version": "154.0.8037.57.1",
-  "versionCode": 803705834,
+  "version": "154.0.8037.92.0",
+  "versionCode": 803709234,
   "zipUrl": "https://github.com/nakoo/vanadium-webview/releases/latest/download/vanadium-webview-module.zip",
   "changelog": "https://github.com/nakoo/vanadium-webview/releases"
 }
