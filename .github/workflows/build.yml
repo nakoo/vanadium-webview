@@ -119,7 +119,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: vanadium-webview-module
-          path: vanadium-webView-module.zip
+          path: vanadium-webview-module.zip
 
       - name: Publish to GitHub Releases
         env:
