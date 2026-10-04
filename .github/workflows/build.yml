@@ -92,15 +92,29 @@ jobs:
           sed -i "s/^version=.*/version=$VANADIUM_VER_NAME/" module.prop
           sed -i "s/^versionCode=.*/versionCode=$VANADIUM_VER_CODE/" module.prop
 
-          # Generate updated update.json
+          # Generate updated update.json pointing to the raw CHANGELOG.md
           cat <<EOF > update.json
           {
             "version": "$VANADIUM_VER_NAME",
             "versionCode": $VANADIUM_VER_CODE,
             "zipUrl": "https://github.com/${{ github.repository }}/releases/latest/download/vanadium-webview-module.zip",
-            "changelog": "https://github.com/${{ github.repository }}/releases"
+            "changelog": "https://raw.githubusercontent.com/${{ github.repository }}/main/CHANGELOG.md"
           }
           EOF
+
+          # Generate release notes for this specific version
+          RELEASE_DATE=$(date -u +'%Y-%m-%d')
+          cat <<EOF > release_notes.md
+          ## [$VANADIUM_VER_NAME] - $RELEASE_DATE
+          - Updated Vanadium WebView to **$VANADIUM_VER_NAME** (versionCode: \`$VANADIUM_VER_CODE\`).
+          - Upstream prebuilt from [GrapheneOS Vanadium](https://gitlab.com/grapheneos/platform_external_vanadium).
+          EOF
+
+          # Prepend to cumulative CHANGELOG.md only if this version is not already recorded
+          touch CHANGELOG.md
+          if ! grep -q "## \[$VANADIUM_VER_NAME\]" CHANGELOG.md; then
+            cat release_notes.md <(echo "") CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
+          fi
 
           echo "VANADIUM_VER_NAME=$VANADIUM_VER_NAME" >> $GITHUB_ENV
           echo "VANADIUM_VER_CODE=$VANADIUM_VER_CODE" >> $GITHUB_ENV
@@ -131,17 +145,17 @@ jobs:
           else
             gh release create "$TAG_NAME" vanadium-webview-module.zip \
               --title "Vanadium WebView $VANADIUM_VER_NAME" \
-              --notes "Automated Vanadium WebView build (versionCode $VANADIUM_VER_CODE)"
+              --notes-file release_notes.md
           fi
 
-      - name: Commit and Push update.json
+      - name: Commit and Push metadata and CHANGELOG.md
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add update.json
-          if ! git diff --staged --quiet update.json; then
-            git commit -m "chore(release): update update.json to $VANADIUM_VER_NAME [skip ci]"
+          git add update.json CHANGELOG.md module.prop
+          if ! git diff --staged --quiet; then
+            git commit -m "chore(release): update metadata and CHANGELOG.md to $VANADIUM_VER_NAME [skip ci]"
             git push origin main
           else
-            echo "update.json is already up to date. Nothing to commit."
+            echo "No changes in update.json, CHANGELOG.md, or module.prop. Nothing to commit."
           fi
