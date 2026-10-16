@@ -8,11 +8,6 @@ ui_print "************************************"
 # Check Architecture
 [ "$ARCH" != "arm64" ] && abort "Error: Only arm64 architecture is supported!"
 
-ui_print "- Disabling conflicting WebView implementations..."
-pm disable com.android.webview 2>/dev/null || true
-pm disable com.google.android.webview 2>/dev/null || true
-pm disable com.google.android.trichromelibrary 2>/dev/null || true
-
 # Detect LineageOS ROMs
 if getprop | grep -qi "lineage"; then
     WVP="system/product/app/VWV"
