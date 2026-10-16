@@ -15,21 +15,15 @@ pm disable com.google.android.trichromelibrary 2>/dev/null || true
 
 # Detect LineageOS ROMs
 if getprop | grep -qi "lineage"; then
-    TLP="system/product/app/VTL"
     WVP="system/product/app/VWV"
 else
-    TLP="system/app/VTL"
     WVP="system/app/VWV"
 fi
 
-mkdir -p "$MODPATH/$TLP" "$MODPATH/$WVP"
-
-ui_print "- Installing TrichromeLibrary..."
-mv "$MODPATH/apks/TrichromeLibrary.apk" "$MODPATH/$TLP/VTL.apk"
-[ -s "$MODPATH/$TLP/VTL.apk" ] || abort "Failed to install TrichromeLibrary!"
+mkdir -p "$MODPATH/$WVP"
 
 ui_print "- Installing Vanadium WebView..."
-mv "$MODPATH/apks/TrichromeWebView.apk" "$MODPATH/$WVP/VWV.apk"
+mv "$MODPATH/apks/VanadiumWebView.apk" "$MODPATH/$WVP/VWV.apk"
 [ -s "$MODPATH/$WVP/VWV.apk" ] || abort "Failed to install Vanadium WebView!"
 
 # Find active overlay partition

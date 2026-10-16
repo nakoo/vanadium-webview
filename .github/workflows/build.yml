@@ -27,15 +27,12 @@ jobs:
         run: |
           mkdir -p apks
           
-          echo "=== Downloading Vanadium WebView & Library ==="
-          curl -L -o apks/TrichromeWebView.apk \
-            "https://gitlab.com/grapheneos/platform_external_vanadium/-/raw/17/prebuilt/arm64/TrichromeWebView.apk"
-
-          curl -L -o apks/TrichromeLibrary.apk \
-            "https://gitlab.com/grapheneos/platform_external_vanadium/-/raw/17/prebuilt/arm64/TrichromeLibrary.apk"
+          echo "=== Downloading Vanadium WebView ==="
+          curl -L -o apks/VanadiumWebView.apk \
+            "https://gitlab.com/grapheneos/platform_external_vanadium/-/raw/17/prebuilt/arm64/VanadiumWebView.apk"
 
           echo "=== Extracting X.509 signature ==="
-          VANADIUM_SIG=$(keytool -printcert -jarfile apks/TrichromeWebView.apk -rfc \
+          VANADIUM_SIG=$(keytool -printcert -jarfile apks/VanadiumWebView.apk -rfc \
             | awk '/BEGIN CERTIFICATE/{flag=1; next} /END CERTIFICATE/{exit} flag' \
             | tr -d '\r\n')
 
@@ -83,8 +80,8 @@ jobs:
       - name: Auto-generate Version Metadata and update.json
         run: |
           BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/* | tail -n 1)
-          VANADIUM_VER_NAME=$($BUILD_TOOLS/aapt dump badging apks/TrichromeWebView.apk | awk -F"versionName='" '{print $2}' | cut -d"'" -f1)
-          VANADIUM_VER_CODE=$($BUILD_TOOLS/aapt dump badging apks/TrichromeWebView.apk | awk -F"versionCode='" '{print $2}' | cut -d"'" -f1)
+          VANADIUM_VER_NAME=$($BUILD_TOOLS/aapt dump badging apks/VanadiumWebView.apk | awk -F"versionName='" '{print $2}' | cut -d"'" -f1)
+          VANADIUM_VER_CODE=$($BUILD_TOOLS/aapt dump badging apks/VanadiumWebView.apk | awk -F"versionCode='" '{print $2}' | cut -d"'" -f1)
 
           echo "Detected Vanadium: $VANADIUM_VER_NAME (code: $VANADIUM_VER_CODE)"
 
