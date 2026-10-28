@@ -1,7 +1,7 @@
 id=vanadium_webview
 name=Vanadium WebView
-version=156.0.8078.47.0
-versionCode=807804704
+version=156.0.8078.73.0
+versionCode=807807304
 author=nakoo
 description=Automatically installs and sets Vanadium as your system WebView implementation on Android 14+.
 updateJson=https://raw.githubusercontent.com/nakoo/vanadium-webview/main/update.json

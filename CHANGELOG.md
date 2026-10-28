@@ -1,3 +1,7 @@
+## [156.0.8078.73.0] - 2026-10-28
+- Updated Vanadium WebView to **156.0.8078.73.0** (versionCode: `807807304`).
+- Upstream prebuilt from [GrapheneOS Vanadium](https://gitlab.com/grapheneos/platform_external_vanadium).
+
 ## [156.0.8078.47.0] - 2026-10-21
 - Updated Vanadium WebView to **156.0.8078.47.0** (versionCode: `807804704`).
 - Upstream prebuilt from [GrapheneOS Vanadium](https://gitlab.com/grapheneos/platform_external_vanadium).
